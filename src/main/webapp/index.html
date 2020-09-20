@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>WITHYOU校园论坛</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="华东理工大学，论坛">
+    <meta name="description" content="为华理学习提供交流的平台">
+    <link rel="stylesheet" href="res/layui/css/layui.css">
+    <link rel="stylesheet" href="res/css/global.css">
+    <link href="res/css/ele.css" rel="stylesheet" type="text/css"/>
+    <script src="js/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="js/element.js"></script>
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/jquery.params.js"></script>
+</head>
+<body>
+<div id="app">
+    <div class="fly-header layui-bg-black">
+        <div class="layui-container">
+            <a class="fly-logo" href="#">
+
+                <img src="res/images/logo.png" alt="withyou">
+            </a>
+            <ul class="layui-nav fly-nav layui-hide-xs">
+                <li class="layui-nav-item layui-this">
+                    <a href="index.html"><i class="iconfont icon-jiaoliu"></i>交流</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a :href="'myMessage.html?userID='+cUser.userID+'&role=我'"><i
+                            class="iconfont icon-iconmingxinganli"></i>我的空间</a>
+                </li>
+            </ul>
+
+            <ul class="layui-nav fly-nav-user">
+
+
+                <li class="layui-nav-item">
+                    <a class="fly-nav-avatar" href="javascript:;">
+                        <cite class="layui-hide-xs">{{cUser.nickname}}</cite>
+
+                        <img :src="imgUrl+cUser.imgPath">
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=0'"><i class="layui-icon">&#xe620;</i>基本设置</a>
+                        </dd>
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=1'"><i
+                                class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=2'"><i class="layui-icon"
+                                                                                                   style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+                        </dd>
+
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="fly-panel fly-column">
+        <div class="layui-container">
+            <ul class="layui-clear">
+                <li class="layui-hide-xs layui-this"><a href="#" @click="getQusetionByType(0,0)">首页</a></li>
+                <li><a href="#" @click="getQusetionByType(1,0)">生活疑惑</a></li>
+                <li><a href="#" @click="getQusetionByType(2,0)">社团活动</a></li>
+                <li><a href="#" @click="getQusetionByType(3,0)">失物招领</a></li>
+                <li><a href="#" @click="getQusetionByType(4,0)">课堂学习</a></li>
+                <li><a href="#" @click="getQusetionByType(5,0)">其它</a></li>
+                <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><span class="fly-mid"></span></li>
+
+                <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a
+                        :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=2'">我发表的贴子</a></li>
+            </ul>
+
+            <div class="fly-column-right layui-hide-xs">
+                <!--      搜索功能-->
+                <span class="fly-search"><i class="layui-icon"></i></span>
+                <a href="add.html" class="layui-btn">发表新帖</a>
+            </div>
+            <div class="layui-hide-sm layui-show-xs-block"
+                 style="margin-top: -10px; padding-bottom: 10px; text-align: center;">
+                <a href="add.html" class="layui-btn">发表新帖</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="layui-container">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8">
+                <div class="fly-panel" style="margin-bottom: 0;">
+
+                    <div class="fly-panel-title fly-filter">
+                        <a href="" class="layui-this" @click="getQusetionByType(currentType,0)">综合</a>
+                        <span class="fly-mid"></span>
+                        <a href="#" @click="getQusetionByType(currentType,1)">按热议</a>
+                        <span class="fly-mid"></span>
+                        <a href="#" @click="getQusetionByType(currentType,2)">按最新</a>
+                    </div>
+
+                    <ul class="fly-list" v-for="item in questions" :key="item.questionID">
+                        <li>
+                            <a class="fly-avatar">
+                                <img :src="imgUrl+item.imgPath" alt="头像" @click="toTarget(item.userID)">
+                            </a>
+                            <h2>
+                                <a class="layui-badge">{{item.typeContent}}</a>
+                                <a :href="'detail.html?questionID='+item.questionID">{{item.content}}</a>
+                            </h2>
+                            <div class="fly-list-info">
+                                <a @click="toTarget(item.userID)">
+                                    <cite>{{item.nickname}}</cite>
+                                </a>
+                                <span>{{item.issueTime}}</span>
+
+                                <span class="fly-list-kiss layui-hide-xs" title="点赞"><i class="iconfont icon-kiss"></i> {{item.agreeNum}}</span>
+                                <span class="fly-list-nums"><i class="iconfont icon-pinglun1" title="评论"></i> {{item.commentNum}}</span>
+                            </div>
+                            <div class="fly-list-badge">
+                            </div>
+                        </li>
+
+                    </ul>
+                    <div style="text-align: center">
+                        <el-pagination @current-change="getPart" :current-page.sync="cPage" background
+                                       layout="prev, pager, next" :page-count="totalPage">
+                        </el-pagination>
+                    </div>
+
+                </div>
+            </div>
+            <div class="layui-col-md4">
+
+                <div class="fly-panel">
+                    <h3 class="fly-panel-title">温馨通道</h3>
+                    <ul class="fly-panel-main fly-list-static">
+                        <li>
+                            <a href="https://www.ecust.edu.cn/" target="_blank">华东理工大学-官网</a>
+                        </li>
+                        <li>
+                            <a href="http://jwc.ecust.edu.cn/" target="_blank">
+                                华东理工大学-教务处
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://lib.ecust.edu.cn/" target="_blank">华东理工大学-图书馆</a>
+                        </li>
+                        <li>
+                            <a href="http://stu.mail.ecust.edu.cn/" target="_blank">
+                                华东理工大学-邮箱登录
+                            </a>
+                        </li>
+                        <li>
+                            <a href="http://urp.ecust.edu.cn/" target="_blank">华东理工大学-信息门户</a>
+                        </li>
+                    </ul>
+                </div>
+                <dl class="fly-panel fly-list-one">
+                    <dt class="fly-panel-title">本周热议</dt>
+                    <dd v-for="item in hotQues" :key="item.questionID">
+                        <a :href="'detail.html?questionID='+item.questionID">{{item.content}}</a>
+                        <span><i class="iconfont icon-pinglun1"></i> {{item.commentNum}}</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+
+    <div class="fly-footer">
+        <p><a href="https://www.ecust.edu.cn/" target="_blank">华东理工大学WITHYOU</a> 2020 &copy; <a href="#"
+                                                                                                target="_blank">withyou
+            出品</a></p>
+        <p>如有问题请联系 chyandgb@163.com</p>
+    </div>
+</div>
+
+
+<script src="res/layui/layui.js"></script>
+<script>
+    layui.cache.page = '';
+    layui.cache.user = {
+        username: '游客'
+        , uid: -1
+        , avatar: 'res/images/avatar/00.jpg'
+        , experience: 83
+        , sex: '男'
+    };
+    layui.config({
+        version: "3.0.0"
+        , base: 'res/mods/' //这里实际使用时，建议改成绝对路径
+    }).extend({
+        fly: 'index'
+    }).use('fly');
+</script>
+
+<script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");
+document.write(unescape("%3Cspan id='cnzz_stat_icon_30088308'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "w.cnzz.com/c.php%3Fid%3D30088308' type='text/javascript'%3E%3C/script%3E"));</script>
+
+</body>
+<script>
+    var main = new Vue({
+        el: "#app",
+        data: {
+            questions: [{
+                questionID: 1,
+                typeID: 2,
+                userID: 1,
+                imgPath: "1.png",
+                nickname: "yuyuzka",
+                issueTime: "4小时前",
+                content: "知名游戏厂",
+                typeContent: "社团活动",
+                agreeNum: "30",
+                commentNum: "68"
+            },
+                {
+                    questionID: 2,
+                    typeID: 1,
+                    userID: 1,
+                    imgPath: "1.png",
+                    nickname: "yuyuzka",
+                    issueTime: "4小时前",
+                    content: "xixixixi",
+                    typeContent: "生活疑惑",
+                    agreeNum: "40",
+                    commentNum: "88"
+                }],
+            imgUrl: "img/",
+            hotQues: [{
+                questionID: 1,
+                content: "一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十",
+                commentNum: "66"
+            }],
+            cPage: 1,
+            totalPage: 10,
+            cUser: {
+                userID: "1",
+                imgPath: "1.png",
+                nickname: "binbin"
+            },
+            currentType: "0",
+            method: "0"
+        },
+        methods: {
+            getPart() {//点击下面的页数,进行查询
+                this.$http.post("question/queryPage", {
+                    currentPage: this.cPage,
+                    type: this.currentType,
+                    method: this.method
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.questions = result.body.message;
+                    }
+                })
+
+                // console.log(this.currentType);
+            },
+            getQusetionByType(Ctype, Cmethood) {//查看首页加载
+                this.currentType = Ctype;
+                this.method = Cmethood;
+                this.$http.post("question/queryNum", {
+                    typeID: Ctype,
+                    method: Cmethood
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.questions = result.body.message;
+                        this.totalPage = result.body.totalPage;
+                        this.cPage = 1;
+                    } else {
+                        alert("数据获取失败");
+                    }
+                })
+
+            },
+            gethotQues() {//获取热门
+                this.$http.get("question/hotquestion").then(result => {
+                    if (result.body.status == 1) {
+                        this.hotQues = result.body.message;
+                    } else {
+                        console.log("系统出现错误");
+                    }
+                }, result => {
+                    console.log("系统出现错误");
+                })
+            },
+            toTarget(id) {
+                var url = "myMessage.html?userID=" + id + "&role=" + ((this.cUser.userID == id) ? "我" : "他");
+                //console.log(url);
+                window.open(url);
+            }
+
+        },
+        created() {
+            this.getQusetionByType(0, 0);
+            this.$http.get("user/getUserID").then(result => {
+                if (result.body.status == 1) {
+                    this.cUser.userID = result.body.userID;
+                    this.$http.post("user/queryAllInfor", {
+                        userID: this.cUser.userID
+                    }).then(result => {//获取用户信息
+                        if (result.body.status == 1) {
+                            this.cUser.nickname = result.body.user.nickname;
+                            this.cUser.imgPath = result.body.user.imgPath;
+                        }
+                    })
+                }
+            })
+
+            this.gethotQues();
+        },
+        beforeCreate() {
+            this.$http.get("user/isLogin").then(result => {//判断是否登录
+                if (result.body.status == 1) {
+                    return;
+                } else {
+                    alert("您还未登录,请先登录");
+                    window.location.href = "login.html";
+                }
+            })
+        }
+    })
+</script>
+</html>

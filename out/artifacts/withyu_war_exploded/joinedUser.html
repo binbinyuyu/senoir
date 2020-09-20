@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>活动参与者</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <script src="js/vue-router.js"></script>
+    <script src="js/jquery.params.js"></script>
+</head>
+<body style="background-color: #f5f5f5">
+<div class="container" id="joined">
+    <section class="py-3">
+        <h5>活动id为 <span style="color: var(--blue);">{{questionID}}</span> 的所有参与者</h5>
+        <hr/>
+    </section>
+    <section class="mb-3">
+        <h6>截至目前为止，参加该活动的人数为：{{joiners.length}} 人</h6>
+    </section>
+    <section class="row" v-for="(item,index) in joiners" :key="item.userID">
+        <div class="col-2">
+            <a class="nav-link" :href="'myMessage.html?userID='+item.userID+'&role=他'"><img :src="imgUrl+item.imgPath"
+                                                                                            class="rounded-circle "
+                                                                                            style="width: 80%;height: auto;"></a>
+
+        </div>
+        <div class="col-4 py-3">
+            <h5 class="mb-2">{{item.nickname}} </h5>
+            <h6 class="mb-2">参与时间 ：<span class="text-muted">{{item.joinTime}}</span></h6>
+            <h6 class="mb-2">学校 : <span class="text-muted">{{item.school}}</span></h6>
+            <h6 class="mb-2">email : <span class="text-muted">{{item.email}}</span></h6>
+        </div>
+        <div class="col-2">
+            <button class="btn btn-primary" @click="kick(item.userID,index)">移除用户</button>
+        </div>
+    </section>
+</div>
+
+</body>
+<script>
+    var joins = new Vue({
+        el: "#joined",
+        data: {
+            questionID: "",
+            imgUrl: "img/",
+            joiners: [{
+                "nickname": "鱼鱼",
+                "userID": "2",
+                "imgPath": "cute-flower.png",
+                "joinTime": "2020-2-17",
+                "school": "华东理工大学",
+                "email": "2"
+            }]
+        },
+        methods: {
+            getJoin(id) {
+                this.$http.post("user_activity/queryParticipant", {
+                    questionID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.joiners = result.body.message;
+                    }
+
+                })
+            },
+            kick(id, index) {
+                this.$http.post("user_activity/kickUser", {
+                    questionID: this.questionID,
+                    userID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("该用户已被移除该活动");
+                        this.issues.splice(index, 1);
+                    }
+                })
+            }
+
+        },
+        created() {
+            var id = $.query.keys.questionID;
+            this.questionID = id;
+            this.getJoin(id);
+        }
+    })
+</script>
+</html>

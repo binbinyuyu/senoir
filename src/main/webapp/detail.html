@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>评论页面</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="stylesheet" href="res/layui/css/layui.css">
+    <link rel="stylesheet" href="res/css/global.css">
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="js/jquery.params.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+
+</head>
+<body>
+<div id="detail">
+    <div class="fly-header layui-bg-black">
+        <div class="layui-container">
+            <a class="fly-logo" href="#">
+
+                <img src="res/images/logo.png" alt="withyou">
+            </a>
+            <ul class="layui-nav fly-nav layui-hide-xs">
+                <li class="layui-nav-item layui-this">
+                    <a href="index.html"><i class="iconfont icon-jiaoliu"></i>交流</a>
+                </li>
+                <li class="layui-nav-item">
+                    <a :href="'myMessage.html?userID='+cUser.userID+'&role=我'"><i
+                            class="iconfont icon-iconmingxinganli"></i>我的空间</a>
+                </li>
+            </ul>
+
+            <ul class="layui-nav fly-nav-user">
+
+
+                <li class="layui-nav-item">
+                    <a class="fly-nav-avatar" href="javascript:;">
+                        <cite class="layui-hide-xs">{{cUser.nickname}}</cite>
+
+                        <img :src="imgUrl+cUser.imgPath">
+                    </a>
+                    <dl class="layui-nav-child">
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=0'"><i class="layui-icon">&#xe620;</i>基本设置</a>
+                        </dd>
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=1'"><i
+                                class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
+                        <dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=2'"><i class="layui-icon"
+                                                                                                   style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+                        </dd>
+
+                    </dl>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="layui-container">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md8 content detail">
+                <div class="fly-panel detail-box">
+                    <h1>{{question.content}}</h1>
+                    <div class="fly-detail-info">
+
+                    </div>
+                    <div class="detail-about">
+                        <a class="fly-avatar" href="../user/home.html">
+                            <img :src="imgUrl+question.imgPath"
+                                 alt="发帖人头像">
+                        </a>
+                        <div class="fly-detail-user">
+                            <a href="../user/home.html" class="fly-link">
+                                <cite>{{question.nickname}}</cite>
+
+                            </a>
+                        </div>
+                        <span>{{question.issueTime}}</span>
+                    </div>
+                    <div class="detail-hits" id="LAY_jieAdmin">
+                        <span style="padding-right: 10px; color: #FF7200"
+                              @click="QuestionToo">点赞：{{question.agreeNum}}</span>
+                        <span v-if="question.typeID==2" style="padding-right: 10px; color: #FF7200"
+                              @click="forId(question.questionID)">参加活动:{{joinNum}}</span>
+                    </div>
+
+                </div>
+
+                <div class="fly-panel detail-box" id="flyReply">
+                    <fieldset class="layui-elem-field layui-field-title" style="text-align: center;">
+                        <legend>回帖</legend>
+                    </fieldset>
+
+                    <ul class="jieda" id="jieda">
+                        <li v-for="(item,index) in comments" :key="item.commentID">
+                            <a name="item-1111111111"></a>
+                            <div class="detail-about detail-about-reply">
+                                <a class="fly-avatar" href="#" @click="toTarget(item.userID)">
+                                    <img :src="imgUrl+item.imgPath"
+                                         alt="回帖人头像 ">
+                                </a>
+                                <div class="fly-detail-user">
+                                    <a href="" class="fly-link">
+                                        <cite>{{item.nickname}}</cite>
+                                    </a>
+                                </div>
+                                <div class="detail-hits">
+                                    <span>{{item.issueTime}}</span>
+                                </div>
+                            </div>
+                            <div class="detail-body jieda-body photos">
+                                <p>{{item.content}}</p>
+                            </div>
+                            <div class="jieda-reply">
+
+                                <div class="jieda-admin" v-if="item.userID==cUser.userID">
+                                    <span @click="deleteComment(item.commentID,index)">删除</span>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- 无数据时 -->
+                        <!-- <li class="fly-none">消灭零回复</li> -->
+                    </ul>
+
+                    <div class="layui-form-pane">
+                        <!--                        <form action="#" method="post">-->
+                        <div class=" layui-form-text">
+                            <!--                                <a name="comment"></a>-->
+                            <div class="layui-input-block">
+                                <textarea v-model="commentContent" id="L_content" name="content" required
+                                          lay-verify="required"
+                                          placeholder="请输入内容" class="layui-textarea fly-editor"
+                                          style="height: 150px;"></textarea>
+                            </div>
+                        </div>
+                        <div class="layui-form-item">
+                            <input type="hidden" name="jid" value="123">
+                            <button class="layui-btn" lay-filter="*" @click="issueComment">提交回复</button>
+                        </div>
+                        <!--                        </form>-->
+                    </div>
+                </div>
+            </div>
+
+            <div class="layui-col-md4">
+                <dl class="fly-panel fly-list-one">
+                    <dt class="fly-panel-title">本周热议</dt>
+                    <dd v-for="item in hotQues" :key="item.QuestionID">
+                        <a :href="'detail.html?questionID='+item.questionID">{{item.content}}</a>
+                    </dd>
+                    <!-- 无数据时 -->
+                    <!--
+                    <div class="fly-none">没有相关数据</div>
+                    -->
+                </dl>
+
+
+            </div>
+        </div>
+    </div>
+
+    <div class="fly-footer">
+        <p><a href="http://122.51.82.131/withyou" target="_blank">WITHYOU社区</a> &copy; 2020 <a
+                href="http://122.51.82.131/withyou"
+                target="_blank"></a></p>
+        <!-- -->
+    </div>
+</div>
+
+
+<script src="res/layui/layui.js"></script>
+<script>
+    layui.cache.page = 'jie';
+    layui.cache.user = {
+        username: '游客'
+        , uid: -1
+        , avatar: '../../res/images/avatar/00.jpg'
+        , experience: 83
+        , sex: '男'
+    };
+    layui.config({
+        version: "3.0.0"
+        , base: 'res/mods/'
+    }).extend({
+        fly: 'index'
+    }).use('fly');
+    //如果你是采用模版自带的编辑器，你需要开启以下语句来解析。
+    /*
+    $('.detail-body').each(function(){
+      var othis = $(this), html = othis.html();
+      othis.html(fly.content(html));
+    });
+    */
+
+</script>
+
+</body>
+<script>
+    var detailVue = new Vue({
+        el: "#detail",
+        data: {
+            joinNum:1,
+            imgUrl: "img/",
+            question: {
+                imgPath: "1.png",
+                userID: "23",
+                issueTime: "2019-08-16",
+                nickname: "yuyuzka",
+                content: "知名游戏厂",
+                number: "30"
+            },
+            questionID: "2",
+            comments: [{
+                nickname: "vivaket",
+                commentID: "1",
+                userID: '1',
+                issueTime: "13：40",
+                content: "你应该去找教务处",
+                imgPath: "1.png"
+            }],
+            totalPage: 10,
+            cPage: 1,
+            commentContent: "",
+            cUser: {
+                userID: "",
+                nickname: "",
+                imgPath: ""
+            },
+            hotQues: [{
+                questionID: 1,
+                content: "一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十一二三四五六七八九十",
+                commentNum: "66"
+            }]
+        },
+        methods: {
+
+            issueComment() {//发布评论
+                console.log("调用了");
+                if (this.commentContent == "") {
+                    alert("评论内容不能为空");
+                    return;
+                }
+                this.$http.post("comment/issue", {
+                    content: this.commentContent,
+                    questionID: this.questionID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("发布成功！");
+                        window.location.reload();
+                    } else {
+                        alert("发布失败！");
+                    }
+                })
+            },
+            getJoin(id){
+                this.$http.post("user_activity/queryParticipant",{
+                    questionID:id
+                }).then(result=>{
+                    if(result.body.status==1){
+                        this.joinNum=result.body.message.length;
+                    }
+
+                })
+            },
+            gethotQues() {//获取热门
+                this.$http.get("question/hotquestion").then(result => {
+                    if (result.body.status == 1) {
+                        this.hotQues = result.body.message;
+                    } else {
+                        console.log("系统出现错误");
+                    }
+                }, result => {
+                    console.log("系统出现错误");
+                })
+            },
+            QuestionToo() {
+                this.$http.post("question/havetoo", {
+                    questionID: this.questionID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        //状态成功   将haveQuestion属性赋值为true
+                        //console.log(that.activities[index].haveQuestion=true);
+                        this.question.agreeNum += 1;
+                        //context.currentTarget.innerText="已顶";
+                        //event.toElement.innerText="已顶";//可以成功
+                    } else if (result.body.status == 0) {
+                        this.$http.post("question/cancelhavetoo", {
+                            questionID: this.questionID
+                        }).then(result => {
+                            if (result.body.status == 1) {
+                                this.question.agreeNum -= 1;
+                            } else {
+                                console.log("系统出现错误！");
+                            }
+                        })
+                    }
+                })
+            },
+            forId(id){//社团参加活动按钮
+                this.$http.post("user_activity/join",{
+                    questionID:id
+                }).then(result=>{
+                    if(result.body.status==1){
+                       this.joinNum+=1;
+                        alert("参加成功！");
+                    }
+                    else if(result.body.status==2){
+                        alert("您已参加过该活动");
+                    }
+                    else if(result.body.status==0){
+                        alert("参加活动失败!");
+                    }
+                })
+            },
+            deleteComment(id, index) {
+                this.$http.post("comment/delete", {
+                    commentID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("删除评论成功");
+                        //this.comments.splice(index,1);//从页面去除当页面10条的时候，删除
+                        window.location.reload();//页面重新加载
+                    } else {
+                        alert("删除评论失败!");
+                    }
+                })
+            },
+            toTarget(id) {
+                var url = "myMessage.html?userID=" + id + "&role=" + ((this.cUser.userID == id) ? "我" : "他");
+                //console.log(url);
+                window.open(url);
+            }
+        },
+        created() {
+            var id = $.query.keys.questionID;//从路径中获取改疑问的id
+            this.questionID = id;
+            this.$http.post("comment/queryNum", {//请求该问题的评论
+                questionID: id
+            }).then(result => {
+                if (result.body.status == 1) {//返回状态1代表请求成功
+                    this.comments = result.body.message;
+                    this.totalPage = result.body.totalPage;//总页数
+                } else {
+                    alert("服务器出现错误");
+                }
+            })
+
+            this.$http.post("question/detail", {//加载评论
+                questionID: id
+            }).then(result => {
+                if (result.body.status == 1) {
+                    this.question = result.body.message;
+                }
+            })
+            this.$http.get("user/getUserID").then(result => {//获取当前用户ID
+                if (result.body.status == 1) {
+                    this.cUser.userID = result.body.userID;
+                    this.$http.post("user/queryAllInfor", {
+                        userID: this.cUser.userID
+                    }).then(result => {//获取用户ID
+                        if (result.body.status == 1) {
+                            this.cUser.nickname = result.body.user.nickname;
+                            this.cUser.imgPath = result.body.user.imgPath;
+                        }
+                    })
+                }
+            })
+
+            this.gethotQues();
+            this.getJoin(id);
+        }
+    })
+</script>
+</html>

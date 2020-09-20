@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>searchResults</title>
+	<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+	<link href="css/ele.css" rel="stylesheet" type="text/css" />
+	<link rel="stylesheet" href="res/layui/css/layui.css">
+	<link rel="stylesheet" href="res/css/global.css">
+	<script src="js/jquery-3.4.1.js" ></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/vue.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+	<script src="js/vue-router.js"></script>
+	<script src="js/element.js"></script>
+	<script src="js/jquery.params.js"></script>
+</head>
+<body style="background-color: #F2F2F2">
+<div class="fly-header layui-bg-black">
+	<div class="layui-container" id="nav">
+		<a class="fly-logo" href="#">
+
+			<img src="res/images/logo.png" alt="withyou">
+		</a>
+		<ul class="layui-nav fly-nav layui-hide-xs">
+			<li class="layui-nav-item layui-this">
+				<a href="index.html"><i class="iconfont icon-jiaoliu"></i>交流</a>
+			</li>
+			<li class="layui-nav-item">
+				<a :href="'myMessage.html?userID='+cUser.userID+'&role=我'"><i
+						class="iconfont icon-iconmingxinganli"></i>我的空间</a>
+			</li>
+		</ul>
+
+		<ul class="layui-nav fly-nav-user">
+
+
+			<li class="layui-nav-item">
+				<a class="fly-nav-avatar" href="javascript:;">
+					<cite class="layui-hide-xs">{{cUser.nickname}}</cite>
+
+					<img :src="imgUrl+cUser.imgPath">
+				</a>
+				<dl class="layui-nav-child">
+					<dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=0'"><i class="layui-icon">&#xe620;</i>基本设置</a>
+					</dd>
+					<dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=1'"><i
+							class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
+					<dd><a :href="'myMessage.html?userID='+cUser.userID+'&role=我&msgTag=2'"><i class="layui-icon"
+																							   style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+					</dd>
+
+				</dl>
+			</li>
+		</ul>
+	</div>
+</div>
+<br>
+<section id="searchPage" style="background-color: #F2F2F2">
+	<div class="container" >
+		<div class="row col-md-8 offset-1">
+			<label class=" col-3 text-center py-1" style="color:var(--primary);">WithYou | 搜索</label>
+			<input class="form-control col-6" v-model="keywords" type="text" placeholder="Search" aria-label="Search">
+			<button class="btn btn-outline-success col-2" type="button" @click="getResults(keywords)">Search</button>
+		</div>
+		<ul class="nav nav-tabs">
+			<li class="nav-items">
+				<a href="#activities"class="nav-link active " @click="changeType('question')" data-toggle="tab">相关事件</a>
+			</li>
+			<li class="nav-items">
+				<a href="#users"class="nav-link" @click="changeType('user')" data-toggle="tab">相关用户</a>
+			</li>
+		</ul>
+		<div class="tab-content py-3">
+			<div id="activities" class="tab-pane active">
+				<div v-if="question.length==0" class="col-3 offset-2">无法搜索到结果</div>
+				<div class="mb-5 row" v-for="(item,index) in question" :key="item.questionID" >
+					<div class="col-2">
+						<a class="nav-link " target="_blank" :href="'myMessage.html?userID='+item.userID+'&role='+((item.userID==currentUser)?'我':'他')"> <img :src="imgUrl+item.imgPath"  class="rounded-circle " style="width: 80%;height: auto;"></a>
+
+					</div>
+					<div class="col-9">
+						<h5>{{item.nickname}}</h5>
+						<small>{{item.issueTime}}</small>
+						<p>{{item.content}}</p>
+						<div v-if="item.typeID=='2'">
+							<button v-if="item.userID!=currentUser" class="btn btn-primary" @click="forId(item.questionID)">参与活动</button>
+						</div>
+						<div v-if="item.typeID!='2'"  class="row">
+							<div v-if="item.haveQuestion" class="col-3">
+								<button class="btn btn-primary" @click="cancelQuestionToo(item.questionID,index)">已顶</button>
+							</div>
+
+							<div class="col-3"><button class="btn btn-primary" @click="comment(item.questionID)">评论</button></div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div id="users" class="tab-pane">
+				<div v-if="user.length==0" class="col-3 offset-2">无法搜索到结果</div>
+				<div class="mb-5 row" v-for="item in user" :key="item.userID" >
+					<div class="col-2">
+						<a class="nav-link " target="_blank" :href="'myMessage.html?userID='+item.userID+'&role='+((item.userID==currentUser)?'我':'他')"> <img :src="imgUrl+item.imgPath"  class="rounded-circle " style="width: 80%;height: auto;"></a>
+
+					</div>
+					<div class="col-9">
+						<h5>{{item.nickname}}</h5>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="py-3">
+			<el-pagination @current-change="getPart" :hide-on-single-page="true" :current-page.sync="cPage" background layout="prev, pager, next" :page-count="pages.totalPage">
+			</el-pagination>
+		</div>
+	</div>
+</section>
+</body>
+<script>
+	var nav=new Vue({
+		el:"#nav",
+		data:{
+			cUser: {
+				userID: "1",
+				imgPath: "1.png",
+				nickname: "binbin",
+			},
+			imgUrl:'img/'
+		},
+		created(){
+			this.$http.get("user/getUserID").then(result=>{
+				if(result.body.status==1){
+					this.userID=result.body.userID;
+				}
+			})
+			this.$http.get("user/getUserID").then(result=>{//获取当前用户ID
+				if(result.body.status==1){
+					this.cUser.userID=result.body.userID;
+					this.$http.post("user/queryAllInfor", {
+						userID:this.cUser.userID
+					}).then(result => {//获取用户ID
+						if (result.body.status == 1) {
+							this.cUser.nickname = result.body.user.nickname;
+							this.cUser.imgPath = result.body.user.imgPath;
+						}
+					})
+				}
+			})
+		}
+	})
+	var searchRes= new Vue({
+		el:"#searchPage",
+		data:{
+			currentUser:"",
+			keywords:"",
+			imgUrl:" img/",
+			question:[{
+				questionID:1,
+				userID:2000,
+				imgPath:"default.png",
+				nickname:"yuyuzka",
+				issueTime:"4小时前",
+				content:"知名游戏厂"
+			}],
+			"user":[{"userID":1,"nickname":"顾bin","imgPath":"123.png"},
+				{"userID":2,"nickname":"鱼鱼","imgPath":"cute-flower.png"}],
+			pages:{
+				totalPage:1,
+				questionPage:10,
+				userPage:20
+			},
+			Ctype:"question",
+			cPage:1
+		},
+		methods:{
+			getPart(){
+				console.log(this.cPage);
+				this.$http.post("user/searchActAndUserByPage",{
+					currentPage:this.cPage,
+					keywords:this.keywords,
+					type:this.Ctype
+				}).then(result=>{
+					if(result.body.status==1){
+						console.log("之前");
+						if(this.Ctype=='question'){
+							console.log("question");
+							this.question=result.body.question;
+						}
+						else{
+							console.log("user")
+							this.user=result.body.user;
+						}
+					}
+
+				})
+			},
+			getResults(data){
+				this.$http.post("user/searchActAndUser",{
+					keywords:data
+				}).then(result=>{
+					if(result.body.status==1){
+						this.question=result.body.question;
+						this.user=result.body.user;
+						this.pages.totalPage=result.body.questionPage;
+						this.pages.questionPage=result.body.questionPage;
+						this.pages.userPage=result.body.userPage;
+					}
+					else{
+
+					}
+				})
+			},
+			forId(id){
+				this.$http.post("user_activity/join",{
+					questionID:id
+				}).then(result=>{
+					if(result.body.status==1){
+						alert("参加成功！");
+					}
+					else if(result.body.status==2){
+						alert("您已参加过该活动");
+					}
+					else if(result.body.status==0){
+						alert("参加活动失败!");
+					}
+				})
+			},
+			questinToo(id,index){//顶一顶
+				//var context=event;
+				//context.currentTarget.innerText="已顶";
+				var that=this;
+				this.$http.post("question/havetoo",{
+					questionID:id
+				}).then(result=>{
+					if(result.body.status==1){
+						//状态成功   将haveQuestion属性赋值为true
+						//console.log(that.activities[index].haveQuestion=true);
+						that.question[index].haveQuestion=true;
+						//context.currentTarget.innerText="已顶";
+						//event.toElement.innerText="已顶";//可以成功
+					}else if(result.body.status==0){
+						console.log("系统出现错误");
+					}
+				})
+			},
+			cancelQuestionToo(id,index){//取消顶一顶
+				//console.log("已点击已点");
+				var that=this;
+				this.$http.post("question/cancelhavetoo",{
+					questionID:id
+				}).then(result=>{
+					//console.log(result.body);
+
+					if(result.body.status==1){
+						//console.log("执行了");
+						//console.log(that.activities[id].haveQuestion);
+						that.question[index].haveQuestion=false;
+					}else{
+						console.log("系统出现错误了");
+					}
+				})
+			},
+			comment(id){//评论页面跳转
+				var url='detail.html?questionID='+id;
+				window.location.href=url;
+			},
+			changeType(type){
+				this.Ctype=type;
+				console.log(this.Ctype)
+				if(type=='question'){
+					this.pages.totalPage=this.pages.questionPage
+				}
+				else{
+					this.pages.totalPage=this.pages.userPage;
+				}
+				this.cPage=1;
+			}
+		},
+		created(){
+			var data = $.query.keys.keywords;
+			this.keywords=data;
+			this.getResults(data);
+			this.$http.get("user/getUserID").then(result=>{
+				if(result.body.status==1){
+					this.currentUser=result.body.userID;
+				}
+			})
+		}
+	})
+
+</script>
+</html>

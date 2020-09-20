@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人空间</title>
+    <link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <script src="js/jquery-3.4.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+    <!-- <link href="css/element.css" rel="stylesheet" /> -->
+    <link href="res/css/ele.css" rel="stylesheet"/>
+    <link href="res/css/bootstrap-reboot.min.css" rel="stylesheet" type="text/css"/>
+    <link href="res/css/cropper.css" rel="stylesheet" type="text/css"/>
+    <link rel="stylesheet" href="res/layui/css/layui.css">
+    <link rel="stylesheet" href="res/css/global.css">
+<!--    <link href="res/css/ele.css" rel="stylesheet" type="text/css"/>-->
+    <script src="js/element.js"></script>
+    <!-- <script src="//unpkg.com/element-ui@2.13.0/lib/index.js"></script> -->
+    <script src="js/vue-router.js"></script>
+    <script src="js/jquery.params.js"></script>
+    <script src="js/cropper.js"></script>
+
+
+</head>
+<body class="d-flex flex-column " style="background-color: #F2F2F2">
+<div class="fly-header layui-bg-black">
+    <div class="layui-container" id="nav" >
+        <a class="fly-logo" href="#">
+
+            <img src="res/images/logo.png" alt="withyou">
+        </a>
+        <ul class="layui-nav fly-nav layui-hide-xs">
+            <li class="layui-nav-item layui-this">
+                <a href="index.html"><i class="iconfont icon-jiaoliu"></i>交流</a>
+            </li>
+            <li class="layui-nav-item">
+                <a :href="'myMessage.html?userID='+userID+'&role=我'"><i class="iconfont icon-iconmingxinganli"></i>我的空间</a>
+            </li>
+        </ul>
+
+        <ul class="layui-nav fly-nav-user">
+            <li class="layui-nav-item">
+                <a class="fly-nav-avatar" href="javascript:;">
+                    <cite class="layui-hide-xs">{{nickname}}</cite>
+                    <img :src="imgUrl+imgPath">
+                </a>
+                <dl class="layui-nav-child">
+                    <dd><a :href="'myMessage.html?userID='+userID+'&role=我&msgTag=0'"><i class="layui-icon">&#xe620;</i>基本设置</a>
+                    </dd>
+                    <dd><a :href="'myMessage.html?userID='+userID+'&role=我&msgTag=1'"><i class="iconfont icon-tongzhi"
+                                                                                         style="top: 4px;"></i>我的消息</a>
+                    </dd>
+                    <dd><a :href="'myMessage.html?userID='+userID+'&role=我&msgTag=2'"><i class="layui-icon"
+                                                                                         style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+                    </dd>
+
+                </dl>
+            </li>
+        </ul>
+    </div>
+</div>
+<br><br>
+<main role="main">
+    <section>
+        <div class="container" id="space" style="background-color: #F2F2F2">
+            <div class="row">
+                <div class="col-2 ">
+                    <div class="row" style="border-radius: 50%;">
+                        <img :src="imgUrl+imgPath" class="rounded-circle mb-5"
+                             style="width: auto;height: auto;width: 100%;height: 100%;"/>
+                        <ul class="nav nav-tabs flex-column" id="myTab">
+                            <li class="nav-items"><a href="#details" class="nav-link " data-toggle="tab"
+                                                     @click="showdetails">个人资料</a></li>
+                            <li class="nav-items"><a v-if="tempName=='我'" href="#avtar" class="nav-link "
+                                                     data-toggle="tab">我的头像</a></li>
+                            <li class="nav-items"><a v-if="tempName=='我'" class="nav-link" data-toggle="tab"
+                                                     href="#changEmail">修改邮箱</a></li>
+                            <li class="nav-items"><a v-if="tempName=='我'" class="nav-link" data-toggle="tab"
+                                                     href="#changPsd">修改密码</a></li>
+                            <li class="nav-items"><a v-if="tempName=='我'" class="nav-link" data-toggle="tab"
+                                                     href="#myJoin">我参加的社团活动</a></li>
+                            <li class="nav-items"><a href="#myIssue" class="nav-link active" data-toggle="tab">{{tempName}}发布的社团活动</a>
+                            </li>
+                            <li class="nav-items"><a href="#question" class="nav-link" data-toggle="tab">{{tempName}}发布的疑问</a>
+                            </li>
+                            <li class="nav-items"><a ref="waitTab" @click="wait" v-if="tempName=='我'" class="nav-link"
+                                                     data-toggle="tab" href="#systemMsg">
+                                <el-badge :value="unread" :hidden="(unread==0)" class="item">系统通知</el-badge>
+                            </a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="col-10 tab-content ">
+                    <h5>昵称: {{nickname}}</h5>
+                    <hr/>
+                    <div id="details" v-if="tempName=='我'" class="tab-pane ">
+                        <small>个人资料</small>
+                        <div class="col-6 offset-2">
+                            <div class="row mb-2">
+                                昵称 ：<input v-model="details.nickname"/>
+                            </div>
+                            <div class="row mb-2">
+                                id ：<span style="color: var(--secondary);">{{currentID}}</span>
+                            </div>
+                            <div class="row mb-2">
+                                姓名 ：<span style="color: var(--secondary);">{{details.name}}</span>
+                            </div>
+                            <div class="row mb-2">
+                                学校 ：
+                                <span style="color: var(--secondary);">{{details.school}}</span>
+                            </div>
+                            <div class="row mb-2">
+                                性别：
+                                <el-radio-group v-model="details.sex">
+                                    <el-radio label="男">男</el-radio>
+                                    <el-radio label="女">女</el-radio>
+                                    <el-radio label="">保密</el-radio>
+                                </el-radio-group>
+                            </div>
+                            <div class="row mb-4">
+                                生日 ：
+                                <el-date-picker v-model="details.birthdate" type="date" placeholder="选择日期"
+                                                format="yyyy 年 MM 月 dd 日" value-format="yyyy-MM-dd"></el-date-picker>
+                            </div>
+                            <div class="row mb-2">
+                                <button class="btn btn-primary" @click="saveDetails">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="changEmail" v-if="tempName=='我'" class="tab-pane">
+                        <div class="col-md-4  offset-2 mb-4">
+                            请输入新的邮箱：
+                            <input class="form-control mb-2" type="email" v-model="tempEmail" style="width: 100%;"/>
+                            <div class="text-muted mb-2">请注意去邮箱查收激活邮件哦</div>
+                            <button class=" form-control btn btn-primary" @click="changEmail">确认</button>
+                        </div>
+                    </div>
+                    <div id="changPsd" v-if="tempName=='我'" class="tab-pane">
+                        <div class="col-md-6 offset-2">
+                            <div class="row mb-2">
+                                <div>
+                                    <h6>请输入原密码：</h6>
+                                    <input @focus="getPsd" ref="oldpsd" type="password" v-model="psds.psd"
+                                           style="widows: 100%;"/>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div>
+                                    <h6>请输入新密码：<small class="text-muted">请确定密码长度为6-20</small></h6>
+                                    <input @focus="checkPsd" type="password" v-model="psds.tempPsd1"/>
+                                </div>
+                            </div>
+                            <div class="row mb-4">
+                                <div>
+                                    <h6>请再次输入新密码:</h6>
+                                    <input type="password" v-model="psds.tempPsd2"/>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <button class="btn btn-primary" @click="changePsd">提交</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="myJoin" v-if="tempName=='我'" class="tab-pane">
+                        <small>我参加的活动</small>
+                        <div v-if="joins.length==0">
+                            <h6 class="text-center" style="color: var(--info);">你还未参加过活动哦</h6>
+                        </div>
+                        <div class="mb-5 row" v-for="(item,index) in joins" :key="item.questionID">
+                            <div class="col-2">
+                                <a class="nav-link " target="_blank"
+                                   :href="'myMessage.html?userID='+item.userID+'&role=他'"><img
+                                        :src="imgUrl+item.imgPath" class="rounded-circle "
+                                        style="width: 80%;height: auto;"/> </a>
+
+                            </div>
+                            <div class="col-8">
+                                <h5>{{item.nickname}}</h5>
+                                <small>{{item.issueTime}}</small>
+                                <p style="word-wrap:break-word;word-break:break-all">{{item.content}}</p>
+                                <button class="btn btn-primary" @click="exitActivity(item.questionID,index)">退出活动
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="myIssue" class="tab-pane active">
+                        <small>{{tempName}}发布的活动</small>
+                        <div v-if="issues.length==0">
+                            <h6 class="text-center" style="color: var(--info);">你还未发布过活动哦</h6>
+                        </div>
+                        <div class="mb-5 row" v-for="(item,index) in issues" :key="item.questionID">
+                            <div class="col-2">
+                                <img :src="imgUrl+imgPath" class="rounded-circle " style="width: 80%;height: auto;"/>
+                            </div>
+                            <div class="col-8">
+                                <h5>{{nickname}}</h5>
+                                <small>{{item.issueTime}}</small>
+                                <br/>
+                                <!-- <component :is="'NotChange'"></component> -->
+                                <el-input ref="forEditActi" type="textarea" class="mb-3 .form-cosntrol-plaintext"
+                                          maxlength=300 v-model="item.content" style="width: 100%; "
+                                          :autosize="{minRows: 2}"></el-input>
+                                <!-- <not-change :parentmsg="item.content" v-if="item.flag"></not-change> -->
+                                <!-- <ing-change :oldmsg="item.content"  @trans="show" v-else="item.flag"></ing-change> -->
+                                <br/>
+                                <button v-if="tempName=='他'" class="btn btn-primary" @click="joinActi(item.questionID)">
+                                    参加活动
+                                </button>
+                                <a :href="'joinedUser.html?questionID='+item.questionID" v-if="tempName=='我'"
+                                   class="btn btn-primary">查看活动成员</a>
+                                <button class="btn btn-primary" @click="saveActi(index)">保存</button>
+                                <button class="btn btn-primary" @click="cancelEditActi(index)">放弃修改</button>
+
+                            </div>
+                            <div class="col-2">
+                                <!--								<button v-if="tempName=='我'" class="btn btn-light" @click="editActi(index)">编辑</button>-->
+                                <button v-if="tempName=='我'" class="btn btn-light" @click="deleteItemActi(index)">删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--发布的疑问-->
+                    <div id="question" class="tab-pane">
+                        <small>{{tempName}} 发布的疑问</small>
+                        <div class="mb-3 row" v-for="(item,index) in questions" :key="item.questionID">
+                            <a class="col-2" href="#">
+                                <img :src="imgUrl+item.imgPath" @click="toTarget(item.userID)" class="rounded-circle "
+                                     style="width: 80%;height: auto;">
+
+                            </a>
+                            <div class="col-8">
+                                <h5>{{nickname}}</h5>
+                                <small>{{item.issueTime}}</small>
+                                <br/>
+                                <el-input ref="forEditQuestion" type="textarea" class="mb-3 .form-control-plaintext"
+                                          maxlength=300 v-model="item.content" style="width: 100%; "
+                                          :autosize="{minRows: 2}"></el-input>
+
+                                <br/>
+                                <button class="btn btn-primary" @click="comment(item.questionID)">评论</button>
+                                <button class="btn btn-primary" v-if="item.flag" @click="saveQuestion(index)">保存
+                                </button>
+                                <button class="btn btn-primary" v-if="item.flag" @click="cancelEditQuestion(index)">
+                                    放弃修改
+                                </button>
+
+                            </div>
+                            <div class="col-2">
+                                <!--								<button v-if="tempName=='我'" class="btn btn-light" @click="editQuestion(index)">编辑</button>-->
+                                <button v-if="tempName=='我'" class="btn btn-light" @click="deleteItemQuestion(index)">
+                                    删除
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="systemMsg" class="tab-pane" v-if="tempName=='我'">
+                        <small>系统通知</small>
+                        <div v-for="item in msgs" :key="item.messageID" class="border py-3 px-2">
+                            <h6>{{item.title}} <small>{{item.sendTime}}</small></h6>
+                            <p class="text-secondary"> {{item.content}}</p>
+                        </div>
+                    </div>
+                    <div id="avtar" class="tab-pane row" v-if="tempName=='我'">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-2">
+                                    <label class="control-label ">头像上传</label>
+                                </div>
+                                <div class="col-2">
+                                    <button class="btn btn-primary btn-sm" @click="upload">确认</button>
+                                </div>
+                            </div>
+                            <div class="row px-3">
+                                <input @change="changeImg" accept="image/*" type="file" name="avatar" id="id_avatar">
+                            </div>
+                            <!-- 裁剪框 -->
+                            <div class="row">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="col-6 mr-2" style="height: 12.5rem;">
+                                            <img id="avatar-img" class="center-block img-responsive mb-4" :src="avatar"
+                                                 alt="" style="width: 80%;height: auto;"/>
+                                        </div>
+                                        <div class="col-2">
+                                            <h6 class="text-muted"> 头像预览: </h6>
+                                            <div class="pre" style="overflow: hidden; width:100px;height: 100px;"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="footer mt-auto py-3 text-center sticky-bottom">
+    <div class="container">
+<!--        <span class="text-muted">Place sticky footer content here.</span>-->
+    </div>
+</footer>
+
+
+</body>
+<script>
+    var navVue = new Vue({
+        el: "#nav",
+        data: {
+            userID: "",
+            keywords: "",
+            unread: "3",
+            nickname: '',
+            imgPath:'',
+            imgUrl:'img/'
+        },
+        methods: {
+            getSearchResult() {
+                var url = "searchResults.html?keywords=" + this.keywords;
+                window.open(url);
+            }
+        },
+        created() {
+            var id = $.query.keys.userID;
+            this.userID=id;
+            this.$http.get("user/getUserID").then(result => {
+                if (result.body.status == 1) {
+                    this.userID = result.body.userID;
+                    this.unread = result.body.new_msg_count;
+                }
+            }),
+                this.$http.post("user/queryAllInfor", {
+                    userID: this.userID,
+                }).then(result => {//获取用户ID
+                    if (result.body.status == 1) {
+                        this.nickname = result.body.user.nickname;
+                        this.imgPath = result.body.user.imgPath;
+
+                    }
+                })
+        }
+    })
+    var spa = new Vue({
+        el: "#space",
+        data: {
+            nickname: "yuyuzka",
+            imgUrl: "img/",
+            currentID: "1",
+            imgPath: "cute-flower.png",
+            tempName: "我",
+            tempEmail: "",
+            unread: 3,
+            avatar: "",
+            cropper: "",
+            details: {
+                nickname: "yuyuzka",
+                name: "顾彬",
+                school: "华东理工大学",
+                sex: "",
+                birthdate: "2000-04-21"
+            },
+            psds: {
+                oldPsd: "",
+                psd: "",
+                tempPsd1: "",
+                tempPsd2: ""
+            },
+            joins: [
+                {
+                    questionID: 1,
+                    imgPath: "blue.png",
+                    nickname: "binbinzka",
+                    issueTime: "4小时前",
+                    content: "想找人陪我一起吃饭"
+
+                }
+            ],
+            issues: [
+                {
+                    questionID: 2,
+                    issueTime: "2小时前",
+                    content: "周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩周末一起出去玩",
+                    flag: true
+                }
+            ],
+            msgs: [
+                {
+                    messageID: 10,
+                    title: "活动成员变化",
+                    content: "昵称为：顾bin 的用户参加了您内容为：好想吃虾滑~ ...的活动",
+                    sendTIme: "2020-02-17 20:28:36"
+                }
+            ],
+            questions: [
+                {
+                    questionID: 1,
+                    typeID: 5,
+                    userID: 1,
+                    imgPath: "tim2.jpg",
+                    nickname: "yuyuzka",
+                    issueTime: "4小时前",
+                    content: "知名游戏厂",
+                    flag: true
+                }
+            ],
+            currentActiContent: "",
+            currentQuesContent: ""
+        },
+        methods: {
+            wait() {//阅读未知消息后将小红点删除
+                var self = this;
+                window.setTimeout(function () {
+                    console.log("执行了定时器");
+                    self.$http.post("message/setRead", {
+                        userID: self.currentID
+                    }).then(result => {
+                        if (result.status == 200) {
+                            self.unread = 0;
+                        }
+                    })
+                }, 2000)
+            },
+            showdetails() {//查询全部信息
+                if (this.tempName == '我') {
+                    this.$http.post("user/queryAllInfor", {
+                        userID: this.currentID
+                    }).then(result => {
+                        if (result.body.status == 1) {
+                            var user = result.body.user;
+                            this.details.nickname = user.nickname;
+                            this.details.name = user.name;
+                            this.details.school = user.school;
+                            this.details.sex = user.sex;
+                            this.details.birthdate = user.birthdate;
+                            this.detailFlag = true;
+                        }
+                    })
+                } else {
+                    alert("你不能查看别人的资料哦~");
+                }
+
+            },
+            saveDetails() {//将保存基本信息发送给服务器//个人资料
+                this.$http.post("user/alterUserInfor", this.details).then(result => {
+                    if (result.body.status == 1) {
+                        alert("信息更改成功！");
+                    } else {
+                        alert("服务器发生错误，信息修改失败");
+                    }
+                })
+            },
+            changeImg(e) {
+                if (this.cropper != "") {
+                    this.cropper.destroy();
+                }//销毁当前裁剪框
+                var image = document.getElementById("avatar-img");
+                let $target = e.target || e.srcElement;
+                let file = URL.createObjectURL($target.files[0]);
+                //console.log(file);
+                this.avatar = file;//将输入的图片应用到裁剪框
+                this.cropper = new Cropper(image, {
+                    aspectRatio: 1 / 1,
+                    viewMode: 2,
+                    autoCropArea: 0.8,
+                    preview: ".pre"
+                })
+                this.cropper.replace(file, false);
+
+            },
+            upload() {//上传头像
+                var img = this.cropper.getCroppedCanvas();//获取裁剪框中的图像
+                var base64 = img.toDataURL('image/jpeg');
+                console.log(base64);
+                this.$http.post("user/uploadHead", {
+                    file: base64
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("头像上传成功");
+                        window.location.reload();
+                    } else {
+                        alert("头像上传失败");
+                    }
+                })
+
+            },
+            changEmail() {//修改邮箱
+                if (this.tempEmail.indexOf('@') == -1) {
+                    alert("邮箱格式无效，请注意检查哦");
+                    return;
+                }
+                this.$http.post("user/alterEmail", {
+                    userID: this.currentID,
+                    email: this.tempEmail
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("邮件发送成功，请注意查收哦");
+                    } else {
+                        alert("系统发生错误，邮箱修改失败");
+                    }
+                })
+            },
+            getPsd() {//获取用户密码
+                this.$http.post("user/getPassword", {
+                    userID: this.currentID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.psds.oldPsd = result.body.password;
+                    } else {
+                        console.log("系统发生错误");
+                    }
+                })
+            },
+            checkPsd() {//检验原密码是否正确
+                if (this.psds.oldPsd != this.psds.psd) {
+                    alert("原密码输入错误");
+                    this.$refs.oldpsd.focus();
+                    this.psds.psd = "";
+                }
+            },
+            changePsd() {//修改密码
+                if (this.psds.psd == "" || this.psds.tempPsd1 == "" || this.psds.tempPsd2 == "") {
+                    alert("您还没有填写完整哦");
+                    return;
+                }
+                if (this.psds.tempPsd1 != this.psds.tempPsd2) {
+                    alert("两次密码输入不一致");
+                    return;
+                }
+                if (this.psds.tempPsd1.length < 6 || this.psds.tempPsd1.length > 20) {
+                    alert("密码长度错误，密码长度需在6-20");
+                    return;
+                }
+                this.$http.post("user/alterPassword", {
+                    userID: this.currentID,
+                    password: this.psds.tempPsd2
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("密码修改成功！");
+                        window.location.href = "login.html";
+                    } else {
+                        alert("系统繁忙，修改密码失败，请稍候再试");
+                    }
+                })
+            },
+            exitActivity(id, index) {//退出用户参加的活动
+                this.$http.post("user_activity/quit", {
+                    questionID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("退出活动成功！");
+                        this.joins.splice(index, 1);
+                    } else if (result.body.status == 0) {
+                        alert("退出活动失败，系统发生错误！");
+                    } else if (result.body.status == 2) {
+                        alert("你已退出该活动");
+                        this.joins.splice(index, 1);
+                    }
+                })
+            },
+            editActi(index) {//出现编辑框
+                //Vue.delete(this.$refs.forEditActi[index],'readonly');
+                //.removeAttr('readOnly');
+                this.issues[index].flag = false;
+                console.log(this.issues[index].flag);
+            },
+            deleteItemActi(index) {//用户删除活动
+                var sta = confirm("你确认要删除吗？");
+                if (sta == true) {
+                    this.$http.post("user_activity/delete", {
+                        questionID: this.issues[index].questionID
+                    }).then(result => {
+                        if (result.body.status == 1) {
+                            alert("删除成功!");
+                            this.issues.splice(index, 1);
+                        } else {
+                            alert("删除失败！");
+                        }
+                    })
+                }
+
+            },
+            saveActi(index) {//保存编辑活动
+                var temp = this.issues[index];
+                //temp.flag=true;
+                this.$http.post("question/alter", {
+                    questionID: temp.questionID,
+                    content: temp.content
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("保存成功");
+                        //temp.content=this.$refs.forEditActi[index].$data.currentValue;
+                        this.currentActiContent[index] = this.issues[index].content;
+                    } else {
+                        alert("保存失败");
+                    }
+                })
+
+            },
+            cancelEditActi(index) {//取消编辑活动
+                var temp = this.issues[index];
+                //temp.flag=true;
+                //this.$refs.forEditActi[index].$data.currentValue=temp.content;
+                temp.content = this.currentActiContent[index];
+            },
+            joinActi(id) {//其他用户参加该用户的活动
+                this.$http.post("user_activity/join", {
+                    questionID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("参加成功！");
+                    } else if (result.body.status == 2) {
+                        alert("您已参加过该活动");
+                    } else if (result.body.status == 0) {
+                        alert("参加活动失败!");
+                    }
+                })
+            },
+            questinToo(id, event) {//顶一顶
+
+                this.$http.post("question/havetoo", {
+                    questionID: id
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        //状态成功   将字改为已顶
+                        event.toElement.innerText = "已顶";
+                    } else {
+                        //取消已顶还没做
+                        //状态失败
+                        alert("已顶");
+
+                    }
+                })
+            },
+            comment(id) {//评论页面跳转
+                var url = 'detail.html?questionID=' + id;
+                window.location.href = url;
+            },
+            editQuestion(index) {//出现编辑框
+                this.questions[index].flag = false
+                console.log(this.questions[index].flag);
+            },
+            deleteItemQuestion(index) {//用户删除question
+                var sta = confirm("你确认要删除吗？");
+                if (sta == true) {
+                    this.$http.post("question/delete", {
+                        questionID: this.questions[index].questionID
+                    }).then(result => {
+                        if (result.body.status == 1) {
+                            alert("删除成功!");
+                            this.questions.splice(index, 1);
+                        } else {
+                            alert("删除失败！");
+                        }
+                    })
+                }
+
+            },
+            saveQuestion(index) {//保存编辑question
+                var temp = this.questions[index];
+                //temp.flag=true;
+                this.$http.post("question/alter", {
+                    questionID: temp.questionID,
+                    content: temp.content
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        alert("保存成功");
+                        //temp.content=this.$refs.forEditQuestion[index].$data.currentValue;
+                        this.currentQuesContent[index] = this.questions[index].content;
+                    } else {
+                        alert("保存失败");
+                    }
+                })
+
+            },
+            cancelEditQuestion(index) {//取消编辑question
+                var temp = this.questions[index];
+                temp.flag = true;
+                //this.$refs.forEditQuestion[index].$data.currentValue=temp.content;
+                temp.content = this.currentQuesContent[index];
+            },
+            getMyJoin() {//获取用户参加的活动
+                this.$http.post("user_activity/queryJoined", {
+                    userID: this.currentID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.joins = result.body.message;
+
+                    } else {
+                        alert("服务器出现错误");
+                    }
+                })
+            },
+            getMyIssue() {//获取用户发布的活动
+                this.$http.post("user_activity/myIssue", {
+                    userID: this.currentID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.issues = result.body.message;
+                        var content = new Array(this.issues.length);
+                        for (var i = 0; i < this.issues.length; i++) {
+                            content[i] = this.issues[i].content;
+                        }
+                        this.currentActiContent = content;
+                    } else {
+                        alert("服务器出现错误");
+                    }
+                })
+            },
+            getSimple() {//获取用户的昵称和头像地址
+                this.$http.post("user/queryAllInfor", {
+                    userID: this.currentID
+                }).then(result => {
+                    if (result.body.status == 1) {
+                        this.nickname = result.body.user.nickname;
+                        this.imgPath = result.body.user.imgPath;
+                        this.avatar = this.imgUrl + this.imgPath;
+                    } else {
+                        alert("服务器出现错误");
+                    }
+                })
+            },
+            getMsg() {//获取用户的未读休息
+                this.$http.get("user/getUserID").then(result => {
+                    if (result.body.status == 1) {
+                        this.unread = result.body.new_msg_count;
+                    }
+                    this.$http.post("message/get", {
+                        userID: this.currentID
+                    }).then(result => {
+                        if (result.body.status == 1) {
+                            this.msgs = result.body.message;
+                        }
+                    })
+                })
+            },
+            getQuestions() {
+                this.$http.get("question/queryMy").then(result => {
+                    if (result.body.status == 1) {
+                        this.questions = result.body.message;
+                        var content = new Array(this.questions.length);
+                        for (var i = 0; i < this.questions.length; i++) {
+                            content[i] = this.questions[i].content;
+                        }
+                        this.currentQuesContent = content;
+                    } else {
+                        alert("服务器出现错误");
+                    }
+                })
+            }
+
+        },
+        created() {
+            var id = $.query.keys.userID;
+            this.currentID = id;
+            this.getSimple();
+            this.tempName = $.query.keys.role;
+            this.getQuestions();
+            if (this.tempName == "我") {
+                this.getMyJoin();
+                this.getMsg();
+            }
+            this.getMyIssue();
+
+
+        },
+        mounted() {
+            if ($.query.keys.msgTag == 0) {
+                // $('#myTab a:last').tab('show');
+                this.showdetails();
+                $('#myTab li:eq(0) a').tab('show');
+                this.wait();
+            } else if ($.query.keys.msgTag == 1) {
+                $('#myTab li:eq(7) a').tab('show');
+                this.wait();
+            } else if ($.query.keys.msgTag == 2) {
+                $('#myTab li:eq(6) a').tab('show');
+                this.wait();
+            }
+        }
+    })
+
+</script>
+</html>

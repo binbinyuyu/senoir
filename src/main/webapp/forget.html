@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>forget</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<link href="css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+		<link href="css/ele.css" rel="stylesheet" type="text/css" />
+		<script src="js/jquery-3.4.1.js" ></script>
+		<script src="js/vue.js"></script>
+		<script src="js/element.js"></script>
+		<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+		<script src="js/jquery.params.js"></script>
+	</head>
+	<body>
+		<div class="container py-5 text-center" id="mainFor">
+			<el-steps :active="step" align-center>
+			  <el-step title="1:确认账号" ></el-step>
+			  <el-step title="2:重置密码" ></el-step>
+			  <el-step title="3:重置成功" ></el-step>
+			</el-steps>
+			<div v-if="step==1" class="py-5 row ">
+				 <label class="col-2 offset-2" >请输入你的邮箱: </label>
+				 <input class="col-3 mr-2" v-model="email" type="email"  />
+				<button class=" btn btn-primary" @click="activeEmail">确认</button>
+			</div>
+			<div v-if="step==2" class="py-5" >
+				<div class="row mb-2">
+					<label class="col-3 offset-2 text-muted">密码长度需为6-20</label>
+				</div>
+				<div class="row mb-2">
+					<label class="col-3 offset-2">请输入你的新密码：</label>
+					<input ref="psd" type="password" v-model="psd"/>
+				</div>
+				<div class="row mb-4">
+					<label class="col-3 offset-2">请再次输入你的新密码：</label>
+					<input type="password" v-model="conPsd"@focus="psdLimit" />
+				</div>	
+				<div class="row">
+					<button class="btn btn-primary col-1 offset-5" @click="changePsd">确认</button>
+				</div>
+			</div>
+			<div v-if="step==3" class="py-5 text-center">
+				<h5>密码重置成功!</h5>
+				<small>
+					<a href="login.html">前往登录页面</a>
+				</small>
+				
+			</div>
+		</div>
+		
+	</body>
+	<script>
+		var forPsd=new Vue({
+			el:"#mainFor",
+			data:{
+				step:1,
+				email:"",
+				code:"",
+				psd:"",
+				conPsd:""
+			},
+			methods:{
+				activeEmail(){
+					this.$http.post("user/forgetPassword",{
+						email:this.email
+					}).then(result=>{
+						if(result.body.status==1){
+							alert("邮件发送成功，请前往邮箱进行改密码的下一步操作");
+						}
+						else if(result.body.status==0){
+							alert("系统出现错误，请稍后再试");
+						}else if(result.body.status==2){
+							alert("该用户未注册！");
+						}
+					})
+				},
+				psdLimit(){
+					if(this.psd.length<6||this.psd.length>20){
+						alert("密码长度需在6-20位");
+						this.$refs.psd.focus();
+					}
+					
+				},
+				changePsd(){
+					if(this.psd.length!=this.conPsd.length){
+						alert("两次输入密码不一致");
+						return;
+					}
+					if(this.psd.length==0||this.conPsd.length==0){
+						alert("你还没有输入完整哦")
+						return;
+					}
+					this.$http.post("user/resetPassword",{
+						password:this.psd,
+						code:this.code
+					}).then(result=>{
+						console.log(result.body);
+						if(result.body.status==1){
+							alert("密码重置成功！");
+							this.step=3;
+						}else{
+							alert("系统出现错误，抱歉，请重试");
+						}
+					})
+				}
+			},
+			created() {
+				this.code = $.query.keys.code;
+				var step=$.query.keys.step;
+				if(step==2){
+					this.step=step;
+				}
+			}
+		})
+	</script>
+</html>

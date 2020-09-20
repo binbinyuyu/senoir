@@ -1,0 +1,172 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Signin</title>
+    <!-- Bootstrap core CSS -->
+    <link href="res/css/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+	<link href="css/normalize.css" type="text/css">
+	<script src="js/jquery-3.4.1.js" ></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/vue.js" type="text/javascript"></script>
+	<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<!--	<script src="js/vue-router.js"></script>-->
+
+
+    <style>
+      
+	  .form-signin{
+		  max-width: 330px;
+		  margin: auto;
+		  padding: 15px;
+		  width: 100%;
+	  }
+      body{
+		  /*display: flex;*/
+		  /* align-items: center;*/
+		  /*padding-top: 40px;*/
+		  /*padding-bottom : 40px;*/
+		  background-color: #f5f5f5
+	  }
+	  .form-signin input[type="password"] {
+	      margin-bottom: 10px;
+	      border-top-left-radius: 0;
+	      border-top-right-radius: 0;
+	  }
+	  .form-signin input[type="email"] {
+	      margin-bottom: -1px;
+	      border-bottom-right-radius: 0;
+	      border-bottom-left-radius: 0;
+	  }
+	
+	html, body {
+	    height: 100%;
+	}
+	  #signIn{
+		  position: absolute;
+		  left: 40%;
+		  top:10%;
+		  padding: 35px;
+		  margin-left: -200px;
+		  margin-top: -250px;
+	  }
+    </style>
+    
+    
+  </head>
+  <body >
+	 <div class="container" id="large-header">
+		 <canvas id="demo-canvas"></canvas>
+		 <div class="col-6 offset-3 mt-5" id="signIn">
+<!--			 <ul class="nav nav-tabs nav-fill">-->
+<!--			 		 <li class="nav-item"><a href="#user" class="nav-link active" data-toggle="tab">用户登录</a></li>-->
+<!--			 		 <li class="nav-item"><a href="#admin" class="nav-link " data-toggle="tab">管理员登录</a></li>-->
+<!--			 </ul>-->
+			 
+			 		 <form class="form-signin text-center">
+			 		 	<img class="mb-4" src="img/cute-flower.png" alt="" width="100" height="100">
+			 		 	<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+<!--						<div class="tab-content" >-->
+							<div id="user" class="tab-pane active">
+								<label for="inputEmail" class="sr-only">Phone number</label>
+								<input type="email" id="inputEmail" class="form-control" v-model="email" placeholder="Email address" required autofocus>
+								<label for="inputPassword" class="sr-only">Password</label>
+								<input type="password" id="inputPassword" class="form-control" v-model="password" placeholder="Password" required>
+								<button class="btn btn-lg btn-primary btn-block" type="submit" @click.prevent="signSub">Sign in</button>
+								 <p class="pt-3"><a target="_blank" href="register.html"><small>没有账号？先去注册</small></a></p>
+								<p><a target="_blank" href="forget.html"><small>忘记密码？</small></a></p>
+							</div>
+<!--							<div id="admin" class="tab-pane">-->
+<!--								<label for="jobNumber" class="sr-only">Phone number</label>-->
+<!--								<input type="email" id="jobNumber" class="form-control" v-model="jobNumber" placeholder="工号" required autofocus>-->
+<!--								<label for="jobPassword" class="sr-only">Password</label>-->
+<!--								<input type="password" id="jobPassword" class="form-control" v-model="jobPassword" placeholder="密码" required>-->
+<!--								<button class="btn btn-success btn-lg btn-block mb-3" @click="adminSub">登录</button>-->
+<!--							</div>-->
+<!--						</div>-->
+			 		 	<div class="checkbox mb-3">
+			 		 		<label>
+			 		 		<input type="checkbox" value="remember-me"> Remember me
+			 		 		</label>
+			 		 	</div>
+			 		 	
+			 		 	<p class="mt-5 mb-3 text-muted">&copy; 2017-2020</p>
+			 		 </form>
+			 		 
+			 </div>
+		 </div>
+		
+		 
+	 </div>
+	 
+    
+</body>
+  <script src="js/TweenLite.min.js"></script>
+  <script src="js/EasePack.min.js"></script>
+  <script src="js/demo-1.js"></script>
+  <script>
+	var sign=new Vue({
+		el:"#signIn",
+		data:{
+			email:"",
+			password:"",
+			jobNumber:"",
+			jobPassword:""
+		},
+		methods:{
+			signSub(){
+				this.$http.post("user/login",{//用户登录
+					email:this.email,
+					password:this.password
+				}).then(result=>{
+						if(result.body.status==1){
+							alert("登陆成功！");
+							this.email="";
+							this.password="";
+							window.location.href="index.html";
+						}
+						else if(result.body.status==0){
+							alert("用户名或密码不匹配");
+							this.email="";
+							this.password="";
+						}
+						else if(result.body.status==2){
+							alert("账号未激活，请注意查看的邮箱的激活邮件");
+							this.email="";
+							this.password="";
+						}
+						else if(result.body.status==3){
+							alert("账号未注册，请先注册！");
+							this.email="";
+							this.password="";
+						}
+					},result=>{
+							if(result.status==404)
+							  alert("url 地址 Not found，服务器出现错误");
+							else if(result.status==500)
+								alert("服务器出现错误");
+							 this.email="";
+							 this.password="";
+
+						}
+				)
+			},
+			adminSub(){
+				this.$http.post("AdminLoginServlet",{//暂时不做
+					jobnum:this.jobNumber,
+					password:this.jobPassword
+				}).then(result=>{
+					if(result.body.status==1){
+						alert("登录成功");
+						
+					}else{
+						alert("用户名或密码错误");
+					}
+				})
+			}
+		}
+	})
+  </script>
+</html>

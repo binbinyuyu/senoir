@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="war" name="withyou">
+    <output-path>$USER_HOME$/Desktop</output-path>
+    <root id="archive" name="withyou.war">
+      <element id="artifact" artifact-name="withyu:war_exploded" />
+    </root>
+  </artifact>
+</component>

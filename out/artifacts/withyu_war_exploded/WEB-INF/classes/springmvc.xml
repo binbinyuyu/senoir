@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc.xsd
+        http://www.springframework.org/schema/context
+        http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <mvc:annotation-driven>
+        <mvc:message-converters register-defaults="true">
+            <bean id="stringHttpMessageConverter" class="org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes" value="application/json;charset=UTF-8"/>
+            </bean>
+        </mvc:message-converters>
+    </mvc:annotation-driven>
+
+    <!--开启注解扫描，只扫描Controller注解-->
+    <context:component-scan base-package="org.withyu">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+    <!--配置的视图解析器对象-->
+    <bean id="internalResourceViewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/WEB-INF/pages/"/>
+        <property name="suffix" value=".html"/>
+    </bean>
+    <!--过滤静态资源-->
+    <mvc:resources location="/css/" mapping="/css/**"/>
+    <mvc:resources location="/img/" mapping="/img/**"/>
+    <mvc:resources location="/headImage/" mapping="/headImage/**"/>
+    <mvc:resources location="/img/" mapping="/img/**"/>
+    <mvc:resources location="/js/" mapping="/js/**"/>
+    <mvc:resources location="/html/" mapping="/html/**"/>
+    <mvc:resources location="/html/case/" mapping="/html/case/**"/>
+    <mvc:resources location="/html/common/" mapping="/html/common/**"/>
+    <mvc:resources location="/html/jie/" mapping="/html/jie/**"/>
+    <mvc:resources location="/html/other/" mapping="/html/other/**"/>
+    <mvc:resources location="/html/user/" mapping="/html/user/**"/>
+    <mvc:resources location="/json/" mapping="/json/**"/>
+    <mvc:resources location="/res/" mapping="/res/**"/>
+    <mvc:resources location="/res/images/" mapping="/res/images/**"/>
+    <mvc:resources location="/res/images/avatar/" mapping="/res/images/avatar/**"/>
+    <mvc:resources location="/res/images/other/" mapping="/res/images/other/**"/>
+    <mvc:resources location="/res/layui/" mapping="/res/layui/**"/>
+    <mvc:resources location="/res/layui/css/" mapping="/res/layui/css/**"/>
+
+
+    <mvc:resources location="/res/layui/font/" mapping="/res/layui/font/**"/>
+    <mvc:resources location="/res/layui/images/" mapping="/res/layui/images/**"/>
+    <mvc:resources location="/res/layui/lay/" mapping="/res/layui/lay/**"/>
+    <mvc:resources location="/res/mods/" mapping="/res/mods/**"/>
+    <mvc:resources location="/res/css/" mapping="/res/css/**"/>
+    <mvc:resources location="/views/" mapping="/views/**"/>
+    <mvc:resources location="/views/case/" mapping="/views/case/**"/>
+    <mvc:resources location="/views/common/" mapping="/views/common/**"/>
+    <mvc:resources location="/views/jie/" mapping="/views/jie/**"/>
+    <mvc:resources location="/views/temp/" mapping="/views/temp/**"/>
+    <mvc:resources location="/views/user/" mapping="/views/user/**"/>
+    <mvc:resources location="/" mapping="/**"/>
+    <mvc:default-servlet-handler/>
+    <!--开启SpringMVC注解的支持-->
+    <mvc:annotation-driven/>
+
+</beans>
